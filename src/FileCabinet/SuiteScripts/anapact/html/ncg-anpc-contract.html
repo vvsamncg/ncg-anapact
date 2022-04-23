@@ -1,0 +1,646 @@
+<script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+></script>
+<script
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"
+></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script
+        src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"
+        integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{custom-validator}}"></script>
+<style>
+    #contract-modal {
+        font-size: 14px !important;
+    }
+
+    ol,
+    ul {
+        padding-left: 0px !important;
+    }
+
+    .wrapper {
+        padding: 10px 20px;
+    }
+    .loaderimagecls {
+        width: 90px;
+        height: auto;
+    }
+
+    .border-red {
+        border: 1px solid red !important;
+    }
+    /* Absolute Center Spinner */
+    .loading {
+        position: fixed;
+        z-index: 9999;
+        height: 2em;
+        width: 2em;
+        overflow: show;
+        margin: auto;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+
+    /* Transparent Overlay */
+    .loading:before {
+        content: '';
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0, .8));
+
+        background: -webkit-radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0,.8));
+    }
+
+    .uir-field.inputreadonly ul, .uir-field.inputreadonly ol, .cke_wysiwyg_div ul, .cke_wysiwyg_div ol, .bgltmedtext ul, .bgltmedtext ol, .text ul, .text ol {
+        display: none;
+    }
+    .uir-field.inputreadonly ul, .cke_wysiwyg_div ul, .bgltmedtext ul, .text ul {
+        list-style-type: none;
+    }
+</style>
+<div class="wrapper" style="padding-bottom: 100px">
+    <div class="loading" style="display: none" id="loading-screen">
+        <img src="https://dlobz6cka9uz.cloudfront.net/Anapact_QA_StaticFiles/images/loader.gif" class="loaderimagecls" alt="Loading" />
+    </div>
+    <div id="templateContent" class="hide">
+
+    </div>
+
+    <div class="ui modal" id = "preview-template">
+        <i class="close icon"></i>
+        <div class="header">
+            Preview Template
+        </div>
+        <div class="content" id = "preview-template-body">
+
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Close
+            </div>
+        </div>
+    </div>
+
+
+    <div class="ui modal" id="contract-modal" >
+        <i class="close icon"></i>
+        <div class="header">
+            <div class="ui two column centered grid">
+                <div class="two column centered row">
+                    <div class="column" style="text-align: center;">
+                        <img src="https://dlobz6cka9uz.cloudfront.net/Anapact_QA_StaticFiles/images/anapact-email-logo.png" alt="Anapact LOGO">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="field">
+                    <label for="Contract template" class="form-label"><b>Contract Template</b></label>
+                    <select class="ui search dropdown" aria-label="Choose Contract" id = "select-contract">
+                    </select>
+                </div>
+                <div class="field" id = "mapping-name-wrapper">
+                    <label for="Mapping Name" class="form-label"><b>Choose mapping record</b></label>
+                    <select style="border: 1px solid #ccc !important;" class="ui search dropdown" aria-label="Choose Mapping Name" id = "select-mapping-name">
+                    </select>
+                </div>
+                <div class="field" id = "new-mapping-name-wrapper">
+                    <label for="New Mapping Name" class="form-label"><b>Enter mapping name</b></label>
+                    <input type = "text" class = "form-control" id = "new-mapping-name">
+                </div>
+                <div class="field"></div>
+                <div class="field" style="min-height: 400px;">
+                    <h5 style="border-bottom: 1px solid #ccc; padding-bottom: 20px; padding-top: 20px;"><b>Anapact Dynamic and MetaData field</b></h5>
+                    <table class="ui table" id = "tbl-metadata-dynamic">
+                        <thead>
+                        <tr id = "tr-contract-name" style="display: none">
+                            <td>
+                                <b>Contract Name</b>
+                            </td>
+                            <td colspan="2">
+                                <input type = "text" class = "form-control" id = "contract-name">
+                            </td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Nope
+            </div>
+            <div class="ui blue buttons">
+                <div class="ui button btn-process">Save</div>
+                <div class="ui floating dropdown icon button">
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <div class="item btn-process" id = "save-and-create"><i class="plus icon"></i> Save and create mapping</div>
+                        <div class="item btn-process" id = "save-and-update"><i class="edit icon"></i> Save and update mapping</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-handlebars-template" id="hb-contract-template-options">
+    <option value="--empty--">--Select Contract--</option>
+    {{#each items}}
+        <option value="{{contractTemplateName}}">{{contractTemplateName}}</option>
+    {{/each}}
+</script>
+<script type="text/x-handlebars-template" id="hb-dynamicfields">
+    {{#each items}}
+        <tr style="display: {{toDisplay}}">
+            <td><b>{{FieldValue}}</b></td>
+            <td><select class = "ui search dropdown fieldmapping" data-id = "{{FieldId}}" data-name = "{{FieldValue}}" data-fieldType = "{{FieldType}}" data-tagging = "dynamicfield"></select></td>
+            <td>
+                <input type="text" class="form-control dynamicFields" value-field = "{{FieldId}}" data-name-equi = "{{FieldValue}}" value = "{{initialValue}}">
+            </td>
+        </tr>
+    {{/each}}
+</script>
+<script type="text/x-handlebars-template" id="hb-metadatafields">
+    {{#each items}}
+        <tr>
+            <td><b>{{FieldName}}</b></td>
+            <td><select class = "ui search dropdown fieldmapping" data-fieldType = "{{FieldType}}" data-name = "{{FieldName}}" data-id = "{{FieldName}}" data-tagging = "metaField"></select></td>
+            <td>
+                <input type="text" class="form-control metadataFields" value-field = "{{FieldName}}" data-name-equi = "{{FieldName}}">
+            </td>
+        </tr>
+    {{/each}}
+</script>
+<script type="text/x-handlebars-template" id="hb-mapping-options">
+    <option value="--empty--">--Select--</option>
+    {{#each items}}
+        <option value="{{value}}">{{field}}</option>
+    {{/each}}
+</script>
+
+<script type="text/x-handlebars-template" id="hb-mapping">
+    <option value="--empty--">--Select--</option>
+    {{#each items}}
+        <option value="{{id}}">{{mappingName}}</option>
+    {{/each}}
+</script>
+<script type="text/javascript">
+    let CONTRACTS;
+    let FIELDMAPPING;
+    let SELECTEDCONTRACT;
+    let URL;
+    let SETTINGID;
+    let MAPPING_ENTRY = [];
+    let DUPES = [];
+    jQuery(document).ready(() => {
+        jQuery("#mapping-name-wrapper").hide();
+        jQuery("#new-mapping-name-wrapper").hide();
+        jQuery("#save-and-update").hide();
+        const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+        dropdownElementList.map(function (dropdownToggleEl) {
+            return new bootstrap.Dropdown(dropdownToggleEl)
+        })
+        Handlebars.registerHelper("toselect", function (a, b) {
+            return a == b ? "selected" : "";
+        });
+
+        jQuery("#select-mapping-name").on("change", function() {
+            console.log("test", jQuery(this).val());
+            if(MAPPING_ENTRY.length > 0) {
+                const filterMapping = MAPPING_ENTRY.filter(ent => (ent.id == jQuery(this).val()));
+                if(filterMapping.length < 1) {
+                    console.log("cannot find this mapping");
+                    jQuery(".fieldmapping").dropdown('set selected', "--empty--")
+                    return true;
+                }
+                let jsonMap = filterMapping[0].jsonMap;
+                if(jsonMap != "") {
+                    jsonMap = JSON.parse(jsonMap);
+                }
+                jsonMap.forEach(entry => {
+                    jQuery("select[data-id='"+entry.fieldId+"'] option").filter(function() {
+                        //may want to use $.trim in here
+                        return jQuery(this).text() == entry.saveSearchField;
+                    }).prop('selected', true).trigger("change");
+                });
+            }
+        });
+
+
+        jQuery("#select-contract").on("change", function() {
+            const contractName = jQuery(this).val()
+            const selectedContract = CONTRACTS.filter(contract => (contract.contractTemplateName == contractName));
+            console.log("selectedContract", selectedContract);
+            SELECTEDCONTRACT = selectedContract;
+            DUPES = [];
+            jQuery("#tr-contract-name").val("");
+            jQuery("#new-mapping-name").val("");
+            jQuery("#select-mapping-name").val("");
+            jQuery("#tr-contract-name").show();
+
+            jQuery("#preview-template-body").empty().html(SELECTEDCONTRACT[0].contractTemplateContent);
+
+
+            const tempUrl = URL + "&method=getMapping&contractName=" + contractName;
+            fetch(tempUrl).then(res => res.json())
+                .then(d => {
+                    console.log("mapping entry", d);
+                    if(d.length > 0) {
+                        MAPPING_ENTRY = d;
+                        const html1 = handleBarHtmlString(d, "#hb-mapping");
+                        jQuery("#select-mapping-name").empty().html(html1);
+                        jQuery("#mapping-name-wrapper").show();
+                        jQuery("#save-and-update").show();
+                    } else {
+                        jQuery("#mapping-name-wrapper").hide();
+                        jQuery("#save-and-update").hide();
+                    }
+                });
+            if(selectedContract && selectedContract.length > 0) {
+                const metadataFields = JSON.parse(selectedContract[0].metDataFieldList);
+                const dynamicFields = JSON.parse(selectedContract[0].dynamicFields);
+                const tempMetaFields = [];
+                metadataFields.forEach(field => {
+                    if("FieldName" in field) {
+                        if(field.FieldName.trim() == "") return true;
+                        tempMetaFields.push(field);
+                    }
+                });
+                console.log("tempMetaFields", tempMetaFields);
+                const html1 = handleBarHtmlString(tempMetaFields, "#hb-metadatafields");
+                const tempDynamicFields = [];
+                const duplicatedFields = [];
+                //check first duplicate fields
+                dynamicFields.forEach(field => {
+                    if("FieldValue" in field) {
+                        if(field.FieldValue.trim() == "") return true;
+                        const checkCurrentField = tempDynamicFields.filter(tempField => (tempField.FieldValue == field.FieldValue));
+                        if(checkCurrentField.length > 0) {
+                            duplicatedFields.push(field);
+                            DUPES.push(field.FieldValue);
+                        }
+                        tempDynamicFields.push(field);
+                    }
+                });
+                console.log("duplicatedFields", duplicatedFields);
+                console.log("tempDynamicFields", tempDynamicFields);
+                dynamicFields.forEach(field => {
+                    if("FieldValue" in field) {
+                        if(field.FieldValue.trim() == "") return true;
+                        const checkCurrentField = duplicatedFields.filter(tempField => (tempField.FieldValue == field.FieldValue));
+                        if(checkCurrentField.length > 0) {
+                            field.toDisplay = "none";
+                            field.initialValue = field.FieldValue;
+                        } else {
+                            field.toDisplay = "";
+                            field.initialValue = "";
+                        }
+                    }
+                });
+                console.log(tempDynamicFields);
+                const html2 = handleBarHtmlString(tempDynamicFields, "#hb-dynamicfields"); //hb-contract-template
+                const html3 = handleBarHtmlString(FIELDMAPPING, "#hb-mapping-options");
+
+                jQuery("#tbl-metadata-dynamic tbody").empty().append(html1).append(html2);
+                jQuery(".fieldmapping").find("option").remove().end().append(html3);
+                jQuery('.ui.dropdown') .dropdown();
+            }
+        });
+
+        jQuery(document).on('change', ".fieldmapping", function() {
+            const dataId = jQuery(this).find("select").attr("data-id");
+            const dataText = jQuery(this).find(".text").html();
+            let dataValue = FIELDMAPPING.filter(entry => (entry.field == dataText));
+            if(dataValue.length > 0) {
+                dataValue = dataValue[0].value
+            } else {
+                dataValue = "";
+            }
+            const fieldType = jQuery(this).find("select").attr("data-fieldType");
+            const tagging = jQuery(this).find("select").attr("data-tagging");
+            const dataName = jQuery(this).find("select").attr("data-name");
+            if(dataValue != "--empty--") {
+                jQuery("#tbl-metadata-dynamic").find("input").each(function() {
+                    if(jQuery(this).attr("data-name-equi") == dataName) {
+                        //console.log(validateField(fieldType, dataValue, tagging));
+                        if(!(validateField(fieldType, dataValue, tagging))) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: "You selected an invalid value for field type " + fieldType,
+                            });
+                            jQuery(this).css("border", "1px solid red !important");
+                            jQuery(this).val("");
+                        } else {
+                            jQuery(this).val(dataValue);
+                        }
+                    }
+                });
+            } else {
+                jQuery("#tbl-metadata-dynamic").find("input").each(function() {
+                    if(jQuery(this).attr("value-field") == dataId) {
+                        jQuery(this).val("");
+                    }
+                });
+            }
+        });
+
+        jQuery(document).on("change", "#contract-name", function() {
+            const val = jQuery(this).val();
+            if(val == "") {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Contract name cannot be empty",
+                });
+                return true;
+            } else if(!isValidString(val)) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Please enter a valid string for contract name.",
+                });
+                return true;
+            }
+            console.log(val);
+            const validateContractNameURL = URL + "&method=validateContractName&settingId=" + SETTINGID + "&txtContractName=" + val;
+            fetch(validateContractNameURL).then(res => res.json())
+                .then(d => {
+                    if(d.statusCode == 300) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Contract name already exist.",
+                        });
+                        jQuery("#contract-name").val("");
+                        console.log("error", SELECTEDCONTRACT);
+                    }
+                });
+
+        });
+
+        jQuery(document).on("click", ".btn-process", function() {
+            console.log("SELECTED_CONTRACT", SELECTEDCONTRACT);
+            const contractName = jQuery("#contract-name").val();
+            const mappingName = jQuery("#new-mapping-name").val();
+
+            let newContractDetails = SELECTEDCONTRACT[0];
+            const metadataFields = JSON.parse(SELECTEDCONTRACT[0].metDataFieldList);
+            const dynamicFields = JSON.parse(SELECTEDCONTRACT[0].dynamicFields);
+            const workFlow = JSON.parse(SELECTEDCONTRACT[0].setWorkFlowList);
+            const dataId = jQuery(this).attr("id");
+            const templateText = jQuery("#select-contract option:selected").text();
+            const mappingNameText = jQuery("#select-mapping-name option:selected").text();
+            const mappingNameValue = jQuery("#select-mapping-name").val();
+
+            if(dataId == "save-and-create" && mappingName == "") {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Mapping name cannot be empty",
+                });
+                return true;
+            }
+
+            if(contractName == "") {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Contract name cannot be empty",
+                });
+                return true;
+            }
+
+            //get metadata field values in UI
+            const fieldMeta = [];
+            const fieldDynamic = [];
+            let toSave = true;
+            console.log("dups", DUPES);
+            jQuery(".dynamicFields").each(function() {
+                const val = jQuery(this).val();
+                const dataId = jQuery(this).attr("value-field");
+                const dataName = jQuery(this).attr("data-name-equi");
+                console.log("dataName", dataName);
+                const inDuplicates = DUPES.filter(dup => (dup == dataName));
+                console.log("duplicates", inDuplicates);
+                if(inDuplicates.length > 0) {
+                    return true;
+                }
+                if(val == "") {
+                    toSave = false;
+                    return false;
+                } else {
+                    fieldDynamic.push({
+                        id: dataId,
+                        value: val
+                    })
+                }
+
+
+            });
+            if(!toSave) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Please fill in all fields.",
+                });
+                return true;
+            }
+            console.log("fieldDynamic", fieldDynamic);
+            jQuery(".metadataFields").each(function() {
+                fieldMeta.push({
+                    id: jQuery(this).attr("value-field"),
+                    value: jQuery(this).val()
+                })
+            });
+            console.log("fieldMeta", fieldMeta);
+            //push the new values into the selected contract details
+            metadataFields.forEach(field => {
+                fieldMeta.map(meta => {
+                    if(meta.id == field.FieldName && field.FieldName!='') {
+                        newContractDetails.contractTemplateContent=
+                            newContractDetails.contractTemplateContent
+                                .replaceAll(field.FieldName, meta.value);
+                        field.FieldValue = meta.value;
+                    }
+                });
+            })
+
+            dynamicFields.forEach(field => {
+                fieldDynamic.map(meta => {
+                    if(meta.id == field.FieldId && field.FieldId != '') {
+                        setValue(field.FieldType, field.FieldId, meta.value);
+
+                        console.log(field.FieldType, field.FieldId, meta.value);
+                        field.FieldValue = meta.value;
+                    }
+                });
+            });
+
+            workFlow.forEach(field => {
+                console.log(field);
+                field.ApproverName = field.ApproverName || '';
+                field.ApproverEmail = field.ApproverEmail || '';
+                field.ApproverDynamicFields = field.ApproverDynamicFields || '';
+                field.ApproverUserId = field.ApproverUserId || '';
+                field.Status =  field.Status || '|todo'
+                field.IsReviewedDoc = field.IsReviewedDoc || false
+            });
+
+            /*console.log("metadataFields", metadataFields);
+            console.log("dynamicFields", dynamicFields);
+            console.log("workflow", workFlow);
+            console.log("contractTemplateName", newContractDetails.contractTemplateContent);*/
+
+            newContractDetails.dynamicFields = dynamicFields;
+            newContractDetails.metDataFieldList = metadataFields;
+            newContractDetails.SetWorkFlowList = JSON.stringify(workFlow);
+            newContractDetails.contractTemplateContent = jQuery("#preview-template-body").html();
+
+            jQuery("#preview-template").modal("show");
+            console.log(jQuery("#preview-template-body").html());
+
+            //get mappingData for later use
+            let tempMappingData = [];
+            jQuery(".fieldmapping").each(function() {
+                const dataId = jQuery(this).find("select").attr("data-id");
+                const dataText = jQuery(this).find(".text").html();
+                const dataName = jQuery(this).find("select").attr("data-name");
+                const filterName = tempMappingData.filter(t => (dataName == t.fieldName));
+                let saveSearchField = "";
+                if(filterName.length > 0) {
+                    saveSearchField = filterName[0].saveSearchField;
+                } else {
+                    saveSearchField = dataText;
+                }
+                tempMappingData.push({
+                    fieldId: dataId,
+                    fieldName: dataName,
+                    saveSearchField: saveSearchField
+                });
+            });
+
+            console.log("tempMappingData", tempMappingData);
+            let action = "save-only";
+            if(dataId == "save-and-create" && mappingName != "") {
+                action = "create";
+            } else if((dataId == "save-and-update") && mappingNameText != "") {
+                action = "update";
+            }
+            const mappingData = {
+                custrecord_ncg_anpc_json_map:  tempMappingData,
+                custrecord_nuage_anpc_contract_template: templateText,
+                custrecord_ncg_anpc_mapping_name: (action == "create" || action == "save-only") ? mappingName: mappingNameText,
+                custrecord_ncg_anpc_contract_template: templateText
+            };
+            if(Object.keys(mappingData).length < 1 || action == "") {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "There is a problem in the data.",
+                });
+                return true;
+            }
+            const payload = {
+                data: newContractDetails,
+                method: "saveContract",
+                contractName: contractName,
+                settingId: SETTINGID,
+                recordType: nlapiGetRecordType(),
+                recordId: nlapiGetRecordId(),
+                action: action, //if its create or update
+                mappingData: mappingData,
+                mappingId: mappingNameValue
+            }
+            console.log(payload);
+            //jQuery('#contract-modal').modal("hide");
+            jQuery("#loading-screen").show();
+            fetch(URL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).then(res => res.json())
+                .then(d => {
+                    if(d.statusCode != 200 && d.statusCode != 201) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: d.body,
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: "Contract has been created.",
+                        });
+                        jQuery('#contract-modal').modal("hide");
+                        //jQuery("#preview-template-body").html(newContractDetails.contractTemplateContent);
+                        jQuery("#preview-template").modal("show");
+                    }
+                    jQuery("#loading-screen").hide();
+                });
+        });
+    });
+
+    function showCreateContractUI(url, settingId) {
+        CONTRACTS = [];
+        SELECTEDCONTRACT = [];
+        URL = url;
+        SETTINGID = settingId;
+        MAPPING_ENTRY = [];
+        DUPLICATES = [];
+        jQuery("#tbl-metadata-dynamic tbody").empty();
+        jQuery("#contract-name").val("");
+        jQuery("#select-contract").val("");
+        jQuery("#tr-contract-name").hide();
+        jQuery("#select-mapping-name").val("");
+        jQuery("#new-mapping-name").val("");
+        jQuery("#select-mapping-name").hide();
+        const serverURL = url + "&method=showContractUI&recordType=" + nlapiGetRecordType() + "&recordId=" + nlapiGetRecordId() + "&settingId=" + settingId;
+        jQuery("#loading-screen").show();
+        fetch(serverURL)
+            .then(res => res.json())
+            .then(d => {
+                console.log(d);
+                jQuery('#contract-modal').modal("show");
+                const html1 = handleBarHtmlString(d.details.templates, "#hb-contract-template-options");
+                jQuery("#select-contract").find("option").remove().end().append(html1);
+                jQuery("#loading-screen").hide();
+                CONTRACTS = d.details.templates;
+                FIELDMAPPING = d.details.fieldMapping;
+                jQuery('.ui.dropdown') .dropdown();
+            });
+    }
+
+    function handleBarHtmlString(data, scriptElement) {
+        var template = jQuery(scriptElement).html();
+        var compiledTemplate = Handlebars.compile(template);
+        return compiledTemplate({ items: data });
+    }
+</script>
